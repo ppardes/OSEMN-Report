@@ -1,0 +1,217 @@
+\documentclass{article}
+\begin{document}
+
+
+\title{ Do animated movies earn higher/lower ratings than non-animated movies} 
+\author{Paresh Pardeshi
+\\ School of Information Technology 
+\\ Illinois State University
+\\
+\texttt{ppardes@ilstu.edu}}
+\date{\today}
+\maketitle
+
+\section*{1]Introduction}
+
+Rotten Tomatoes is a website launched in 1998 devoted to film reviews and news; it is widely known as a film review aggregator. Coverage now includes TV content as well.
+
+This paper focus on the comarparison between animated movies and the Non-animated movies. which kind of moives earn higher or lower rating if they compare to each other. 
+
+The statistics include different subcategories such as science fiction movies. Tables and graphs will be used as a visual description of the results gathered from analyzing the data.
+
+Rotten Tomatoes API
+The Rotten Tomaoes API (Application Program Interface) provides limited access to critic and audience ratings and reviews, allowing developers to incoporate Rotten Tomatoes data on other websites. The free service is intended for use in the US only; permission is required for use elsewhere.
+
+\section*{2]Data}
+
+This section will conduct an in-depth exploration of the data, and will display detailed information about the dataset. Data will need to be obtained before being analyzed. Data was downloaded from RottonTommatoes as a csv format, then was imported to R Studio and stored into two different data frame called scifimovies and animmovies. Not all the data was needed. Therefore, further cleaning was required on the dataset.
+
+Only The Ratings and number of reviews of animated movies and the other movies were needed. after getting the relevant information, I have created the tables for animated movies and for the Non-animated movies in which I have selected a particular category which is science fiction.
+
+
+
+Code Chunk 1: Procedures of obtaining data, storing data, and cleaning data
+
+
+<<echo=TRUE>>=
+# we will be using ggplot to plot the graph
+library(ggplot2)
+
+
+# showing the particular table number for the category which is animated movies
+tabno <-3;
+# import the data from website
+add <- rvest::html("http://www.rottentomatoes.com/top/bestofrt/top_100_science_fiction__fantasy_movies/?category=14")
+# select the table for science fiction movies
+scifi <- rvest::html_table(rvest::html_nodes(add, "table")[[tabno]])
+# putting the data into data frame
+scifimovies <-data.frame(write.csv(scifi))
+
+
+# showing the particular table number for the category which is animated movies
+tabnum <-3;
+# import the data from website
+add <- rvest::html("http://www.rottentomatoes.com/top/bestofrt/?category=2")
+# select the table for animated movies
+anim <- rvest::html_table(rvest::html_nodes(add, "table")[[tabnum]])
+# putting the data into data.frame
+animmovies <-write.csv(anim)
+
+
+
+@
+
+
+
+
+
+Code Chunk 2: Display the data type of data set
+
+
+<<chunk2,echo=TRUE>>=
+class(scifi)
+class(anim)
+
+@
+
+
+
+Code chunk 3: displaying the content of the tables (number of observations and variables along with 
+the columns discription)
+<<chunk3,echo=TRUE>>=
+str(scifi)
+str(anim)
+@
+
+
+
+Code chunk 4: Summary of data sets
+
+<<chunk4,echo=TRUE>>=
+#Display the summary of the whole data set
+summary(scifi)
+summary(anim)
+
+@
+
+
+\section*{3]Data Defination}
+
+As we have gather the relevant data, now we need to clean and operate the data in order to get the result that we are looking for. we have tables for scifi movies and animated movies. In the column RatingTomatometer, there are some NA values that we need to remove from column. to do this we are using na.omit function. 
+
+
+
+
+Code Chunk 5: Extracting the NA values from the column RatingTomatometer of the table
+
+<<chunk5,echo=TRUE>>=
+#after removing the NA values, data is moving into data frame sc
+sc<-na.omit(scifi$RatingTomatometer)
+head(sc)
+#after removing the NA values, data is moving into data frame sc
+an<-na.omit(anim$RatingTomatometer)
+head(an)
+@
+
+
+
+
+Code Chunk 6: Display the data type and structure of scifi movies ratings
+
+
+<<chunk6,echo=TRUE>>=
+#Display the data type of the Rating data
+class(scifi$RatingTomatometer)
+
+# Display the structure of the Rating data
+str(scifi$RatingTomatometer)
+
+
+@
+
+
+
+
+Code Chunk 7: Display the data type and structure of animated movies ratings
+
+<<chunk7,echo=TRUE>>=
+
+#Display the data type of the Rating data
+class(anim$RatingTomatometer)
+
+# Display the structure of the Rating data
+str(anim$RatingTomatometer)
+
+@
+
+
+
+
+Code Chunk 8: Removing the percentage sign in order to calculate the mean of the percentage column.
+To do that we used gsub command. 
+
+<<chunk8,echo=TRUE>>=
+#after extracting the percentage sign ,the values are going into x data frame
+x <- as.numeric(gsub("%", "", sc))
+head(x)
+
+#after extracting the percentage sign ,the values are going into y data frame
+y <- as.numeric(gsub("%", "", an))
+head(y)
+
+@
+
+
+
+
+Code chunk 9: Calculate the Mean of ratings column. 
+
+To do that we used mean command and unlist command
+unlist simplifies it to produce a vector which contains all the atomic components which occur in x and y.
+
+<<chunk9,echo=TRUE>>=
+#
+x1<-mean(as.numeric(unlist(x), na.rm=T))
+
+y1<-mean(as.numeric(unlist(y), na.rm=T))
+
+
+@
+
+\section*{4]Result}
+ 
+ This section will display the result after analyzing the data.
+ 
+ 
+ Code Chunk 10: Display the mean of columns
+<<chunk10,echo=TRUE>>=
+# display mean value of percentage rating for scifi movies
+x1
+# display mean value of percentage rating for animated movies
+y1
+
+@
+
+
+
+Code Chunk 11: plotting the graph
+
+<<chunk11,echo=TRUE>>=
+
+Movies <-c("non-animated", "animated")
+Movies
+Ratings<-c(x1,y1)
+Ratings
+df = data.frame(Movies, Ratings)
+ggplot(data=df, aes(x=Movies, y=Ratings,fill=Movies)) + geom_bar(colour="black",stat="identity")+ggtitle("Movies Ratings")
+
+# Line Graph Shows comparison between animated and non animated movies 
+ggplot(data=df, aes(x=Movies, y=Ratings, group=1)) +
+    geom_line() +
+    geom_point()
+
+
+
+@
+
+\end{document}
